@@ -3,10 +3,8 @@ dist: trusty
 language: python
 python:
   - 3.6
-addons:
-  apt:
-    packages:
-      - pip install requests
+before_install:
+  - pipenv install requests
 install:
   - python setup.py install
 script:
