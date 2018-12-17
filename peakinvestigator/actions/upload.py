@@ -30,15 +30,6 @@ class UploadAction(BaseAction):
         return query
 
     @property
-    def token(self):
-        """Returns token for upload.
-
-        """
-
-        super(UploadAction, self).precheck()
-        return self._data["Token"]
-
-    @property
     def host(self):
         """Returns host.
 
@@ -55,3 +46,13 @@ class UploadAction(BaseAction):
 
         super(UploadAction, self).precheck()
         return self._data["Port"]
+
+    @property
+    def token(self):
+        """Returns token for upload.
+
+        """
+
+        super(UploadAction, self).precheck()
+        return self._data["Token"]
+
