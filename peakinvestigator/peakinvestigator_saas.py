@@ -6,8 +6,13 @@
 # (http://veritomyx.com) and is distributed under the terms
 # of the BSD 3-Clause license.
 
+import os
 import requests
+import tarfile
+import zipfile
 from paramiko.client import SSHClient, WarningPolicy
+from peakinvestigator.internal.uploader import Uploader
+
 
 class PeakInvestigatorSaaS(object):
     """"An object for interacting with the PeakInvestigator API. See 
@@ -62,17 +67,22 @@ class PeakInvestigatorSaaS(object):
         response = requests.post(self._server + "/api/", data=action.build_query())
         return response.text
         
-    def upload(self, sftp_action, local_file, remote_file, callback=None):
-        """Upload a file to a SFTP server."""
-        
-        with SSHClient() as ssh:
-            ssh.set_missing_host_key_policy(WarningPolicy())
-            ssh.connect(sftp_action.host, port=sftp_action.port,
-                            username=sftp_action.sftp_username,
-                            password=sftp_action.sftp_password)
-            with ssh.open_sftp() as sftp:
-                sftp.put(local_file, remote_file, callback)
+    def upload(self, upload_action, local_file, progress_factory, num_scan=0):
+        """Upload file to a SFTP server"""
+        upload_action.num = num_scan
+        uploader = Uploader(upload_action.host, upload_action.token, progress_factory)
+        if os.path.exists(local_file):
+            if tarfile.is_tarfile(local_file):
+                uploader.upload_tarfile(local_file)
+            elif zipfile.is_zipfile(local_file):
+                uploader.upload_zipfile(upload.file)
+            else:
+                uploader.upload_file(local_file, int(upload_action.num))
+        else:
+            filenames = glob.glob(local_file)
+            uploader.upload_files(filenames, int(upload_action.start))
 
+        uploader.close()
 
     def download(self, sftp_action, remote_file, local_file, callback=None):
         """Download a file from a SFTP server."""
@@ -84,4 +94,3 @@ class PeakInvestigatorSaaS(object):
                             password=sftp_action.sftp_password)
             with ssh.open_sftp() as sftp:
                 sftp.get(remote_file, local_file, callback)
-    
