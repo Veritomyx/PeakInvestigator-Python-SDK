@@ -15,5 +15,12 @@ import time
 import tarfile
 import zipfile
 from tqdm import tqdm
+<<<<<<< HEAD
 from peakinvestigator.internal.progress2 import *
 from peakinvestigator.internal.progress import *
+=======
+from peakinvestigator.internal.logger import *
+from peakinvestigator.internal.logger2 import *
+from peakinvestigator.internal.progress import *
+from peakinvestigator.internal.test_progress import *
+>>>>>>> uploader_19jan18
