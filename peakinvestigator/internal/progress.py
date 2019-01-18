@@ -1,32 +1,25 @@
 ## -*- coding: utf-8 -*-
 #
-# Copyright (c) 2016, Veritomyx, Inc.
+# Copyright (c) 2016-2018, Veritomyx, Inc.
 #
 # This file is part of the Python SDK for PeakInvestigator
 # (http://veritomyx.com) and is distributed under the terms
 # of the BSD 3-Clause license.
-import logging
-import time
+from abc import ABC, ABCMeta, abstractmethod
 
-logging.info('Progress')
-class LoggerProgress(object):
+class ProgressFactory(ABC):
+    @abstractmethod
+    def create(self, total, unit):
+        """return an implementation of progress"""
+        print("Not implemented")
 
-    def __init__(self, total, unit='scans'):
-
-        self.total = total
-        self.unit = unit
-        self.count = 0
-        self.clock = time.time()
-        self.logger = logging.getLogger('Progress')
-        self.logger.setLevel(logging.INFO)
-        self.logger.info('Starting upload of {} {}'.format(total, unit))
-
+class Progress(ABC):
+    @abstractmethod
     def update(self, update):
-        self.count += update
-        current = time.time()
-        if current - self.clock > 30:
-            self.logger.info('Finished uploading {} of {} {}.'.format(self.count, self.total, self.unit))
-            self.clock = current
+        """return an implementation of progress update"""
+        print("Not impelemnted")
 
+    @abstractmethod
     def close(self):
-        self.logger.info('Finished upload of {} {}'.format(self.count, self.unit))
+        """return an implementation of close progress"""
+        print("Not implemented")
