@@ -8,4 +8,3 @@
 from peakinvestigator.progress.logger import *
 from peakinvestigator.progress.loggerpercentage import *
 from peakinvestigator.progress.progress import *
-from peakinvestigator.progress.test_progress import *
