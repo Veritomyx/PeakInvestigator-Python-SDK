@@ -10,6 +10,7 @@ import os
 import requests
 import tarfile
 import zipfile
+import glob
 from paramiko.client import SSHClient, WarningPolicy
 from peakinvestigator.progress.uploader import Uploader
 
@@ -80,7 +81,7 @@ class PeakInvestigatorSaaS(object):
                 uploader.upload_file(local_file, int(upload_action.num))
         else:
             filenames = glob.glob(local_file)
-            uploader.upload_files(filenames, int(upload_action.start))
+            uploader.upload_files(filenames)
 
         uploader.close()
 
