@@ -13,7 +13,6 @@ import struct
 import tarfile
 import zipfile
 
-
 class Uploader(object):
 
     def __init__(self, host, token, progress_factory, log_level=logging.WARNING):
@@ -49,55 +48,44 @@ class Uploader(object):
     def upload_file(self, filename, num, with_progress=True):
         size = os.path.getsize(filename)
         filetype = 0 if filename[-4:] == '.bin' else 1
-        if self.progress_factory == None:
-            with io.open(filename, 'rb') as f:
-                self.upload_filehandle(num, filetype, size, f)
-        else:
-            progress = self.progress_factory.create(total=size, unit='bytes') if with_progress else None
-            with io.open(filename, 'rb') as f:
-                self.upload_filehandle(num, filetype, size, f, progress)
+        progress = self.progress_factory.create(total=size, unit='bytes') if (self.progress_factory != None and with_progress) else None
+        with io.open(filename, 'rb') as f:
+            self.upload_filehandle(num, filetype, size, f, progress)
+        if (with_progress and progress):
+            progress.close()
 
     def upload_files(self, filenames, start=0):
-        if self.progress_factory == None:
-            for i, filename in enumerate(filenames, start):
-                self.upload_file(filename, i, False)
-        else:
-            progress = self.progress_factory.create(total=len(filenames), unit='scans')
-            for i, filename in enumerate(filenames, start):
-                self.upload_file(filename, i, False)
+        progress = self.progress_factory.create(total=len(filenames), unit='file(s)') if self.progress_factory != None else None
+        for i, filename in enumerate(filenames, start):
+            self.upload_file(filename, i, False)
+            if progress:
                 progress.update(1)
+        if progress:
             progress.close()
 
     def upload_tarfile(self, filename):
         with tarfile.open(filename) as f:
             members = list(filter(lambda x: x.isfile(), f.getmembers()))
-            if self.progress_factory == None:
-                for i, member in enumerate(members):
-                    filetype = 0 if member.name[-4:] == '.bin' else 1
-                    self.upload_filehandle(i, filetype, member.size, f.extractfile(member), None)
-            else:
-                progress = self.progress_factory.create(total=len(members), unit='scans')
-                for i, member in enumerate(members):
-                    filetype = 0 if member.name[-4:] == '.bin' else 1
-                    self.upload_filehandle(i, filetype, member.size, f.extractfile(member), None)
+            progress = self.progress_factory.create(total=len(members), unit='scans') if self.progress_factory != None else None
+            for i, member in enumerate(members):
+                filetype = 0 if member.name[-4:] == '.bin' else 1
+                self.upload_filehandle(i, filetype, member.size, f.extractfile(member), None)
+                if progress:
                     progress.update(1)
+            if progress:
                 progress.close()
 
     def upload_zipfile(self, filename):
         with zipfile.ZipFile(filename) as f:
             members = list(filter(lambda x: not x.is_dir(), f.infolist()))
-            if self.progress_factory == None:
-                for i, member in enumerate(members):
-                    filetype = 0 if member.filename[-4:] == '.bin' else 1
-                    with f.open(member) as entry:
-                        self.upload_filehandle(i, filetype, member.file_size, entry, None)
-            else:
-                progress = self.progress_factory.create(total=len(members), unit='scans')
-                for i, member in enumerate(members):
-                    filetype = 0 if member.filename[-4:] == '.bin' else 1
-                    with f.open(member) as entry:
-                        self.upload_filehandle(i, filetype, member.file_size, entry, None)
+            progress = self.progress_factory.create(total=len(members), unit='file(s)') if self.progress_factory != None else None
+            for i, member in enumerate(members):
+                filetype = 0 if member.filename[-4:] == '.bin' else 1
+                with f.open(member) as entry:
+                    self.upload_filehandle(i, filetype, member.file_size, entry, None)
+                if progress:
                     progress.update(1)
+            if progress:
                 progress.close()
 
     def close(self):
