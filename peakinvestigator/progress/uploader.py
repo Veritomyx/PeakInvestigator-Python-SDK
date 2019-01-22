@@ -45,19 +45,19 @@ class Uploader(object):
             self.close()
             raise Exception('Problem sending file #{}: {}'.format(num, response))
 
-    def upload_file(self, filename, num, with_progress=True):
+    def upload_file(self, filename, num):
         size = os.path.getsize(filename)
         filetype = 0 if filename[-4:] == '.bin' else 1
-        progress = self.progress_factory.create(total=size, unit='bytes') if (self.progress_factory != None and with_progress) else None
+        progress = self.progress_factory.create(total=size, unit='bytes') if self.progress_factory != None else None
         with io.open(filename, 'rb') as f:
             self.upload_filehandle(num, filetype, size, f, progress)
-        if (with_progress and progress):
+        if progress:
             progress.close()
 
     def upload_files(self, filenames, start=0):
         progress = self.progress_factory.create(total=len(filenames), unit='file(s)') if self.progress_factory != None else None
         for i, filename in enumerate(filenames, start):
-            self.upload_file(filename, i, False)
+            self.upload_file(filename, i)
             if progress:
                 progress.update(1)
         if progress:
